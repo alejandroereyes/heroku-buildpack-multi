@@ -1,2 +1,9 @@
-#!/bin/bash
-exit 0
+#!/usr/bin/env bash
+
+source ./detect
+source ./compile
+
+BUILDPACK_MULTI_TEST_CMD=${BUILDPACK_MULTI_TEST_CMD:-"echo buildpack_multi_test_cmd_missing"}
+eval $BUILDPACK_MULTI_TEST_CMD
+
+exit $?
