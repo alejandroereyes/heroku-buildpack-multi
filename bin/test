@@ -2,8 +2,15 @@
 
 multi_bin=/tmp/buildpacks/custom/bin
 
-source $multi_bin/detect
-source $multi_bin/compile
+detect_files=$(source $multi_bin/detect)
+if [ $? != 0 ]; then
+  exit 1
+fi
+
+compile_packs=$(source $multi_bin/compile)
+if [ $? != 0 ]; then
+  exit 1
+fi
 
 BUILDPACK_MULTI_TEST_CMD=${BUILDPACK_MULTI_TEST_CMD:-"echo buildpack_multi_test_cmd_missing"}
 eval $BUILDPACK_MULTI_TEST_CMD
