@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
-source ./test
+multi_bin=$(pwd)
+
+source $multi_bin/test
 
 exit $?

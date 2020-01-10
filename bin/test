@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-source ./detect
-source ./compile
+multi_bin=$(pwd)
+
+source $multi_bin/detect
+source $multi_bin/compile
 
 BUILDPACK_MULTI_TEST_CMD=${BUILDPACK_MULTI_TEST_CMD:-"echo buildpack_multi_test_cmd_missing"}
 eval $BUILDPACK_MULTI_TEST_CMD
