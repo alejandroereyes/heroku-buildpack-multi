@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-multi_bin=$(pwd)
+multi_bin=/tmp/buildpacks/custom/bin
 
 source $multi_bin/detect
 source $multi_bin/compile
