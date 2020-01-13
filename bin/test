@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
 echo 'Running buildpack-multi test'
+echo "BPT - $0"
+echo "BPT - $1"
+echo "BPT - $2"
+echo "BPT - $3"
 
 if [[ -f $1/buildpack-multi-test.sh ]]; then
   BP_MULTI_DIR="1"
