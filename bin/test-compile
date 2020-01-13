@@ -2,6 +2,11 @@
 
 multi_bin=/tmp/buildpacks/custom/bin
 
-source $multi_bin/test
+detect_files=$(source $multi_bin/detect)
+if [ $? != 0 ]; then
+  exit 1
+fi
+
+compile_packs=$(source $multi_bin/compile)
 
 exit $?
