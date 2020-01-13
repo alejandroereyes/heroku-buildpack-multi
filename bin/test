@@ -4,12 +4,13 @@ echo 'Running buildpack-multi test'
 
 for BUILDPACK in $(cat $1/.buildpacks); do
   if [[ -f $1/buildpack-multi-test.sh ]]; then
+    echo "Running found $1/buildpack-multi-test file"
     source $1/buildpack-multi-test.sh $BUILDPACK $1
     if [ $? != 0 ]; then
       echo "Running buildpack-multi-test failed"
       exit 1
     fi
   else
-    echo "buildpack-multi-test.sh not found"
+    echo "buildpack-multi-test file not found"
   fi
 done
