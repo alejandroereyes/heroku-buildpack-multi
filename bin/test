@@ -2,10 +2,16 @@
 
 echo 'Running buildpack-multi test'
 
+if [[ -f $1/buildpack-multi-test.sh ]]; then
+  BP_MULTI_DIR="1"
+else
+  BP_MULTI_TEST="0"
+fi
+
 for BUILDPACK in $(cat $1/.buildpacks); do
-  if [[ -f $1/buildpack-multi-test.sh ]]; then
+  if [ "$BP_MULTI_TEST" = "1" ]; then
     echo "Running found $1/buildpack-multi-test file"
-    . $1/buildpack-multi-test.sh $BUILDPACK $1
+    . $1/buildpack-multi-test.sh $1 "i" $BUILDPACK
     if [ $? != 0 ]; then
       echo "Running buildpack-multi-test failed"
       exit 1
@@ -14,3 +20,7 @@ for BUILDPACK in $(cat $1/.buildpacks); do
     echo "buildpack-multi-test file not found"
   fi
 done
+
+if [ "$BP_MULTI_TEST" = "1" ]; then
+  . $1/buildpack-multi-test.sh $1 "f"
+fi
