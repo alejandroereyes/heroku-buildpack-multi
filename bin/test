@@ -2,9 +2,10 @@
 
 set -e
 
-for BUILDPACK in $(cat $1/.buildpacks); do
-  dir=tmp$(mktemp -t buildpackXXXXX)
+unset GIT_DIR
 
+for BUILDPACK in $(cat $1/.buildpacks); do
+  dir=$(mktemp -t buildpackXXXXX)
   rm -rf $dir
 
   url=${BUILDPACK%#*}
@@ -30,9 +31,30 @@ for BUILDPACK in $(cat $1/.buildpacks); do
     git checkout $branch >/dev/null 2>&1
   fi
 
+  chmod -f +x $dir/bin/{detect,compile} || true
+
+  framework=$($dir/bin/detect $1)
+
+  if [ $? == 0 ]; then
+    echo "=====> Detected Framework: $framework"
+    $dir/bin/compile $1 $2 $3
+
+    if [ $? != 0 ]; then
+      exit 1
+    fi
+
+    # check if the buildpack left behind an environment for subsequent ones
+    if [ -e $dir/export ]; then
+      source $dir/export
+    fi
+  else
+    echo "No framework found for buildpack $BUILDPACK"
+    exit 1
+  fi
+
+  # TEST =============================================================
   if [[ -f $dir/bin/test ]]; then
     echo "Detected test for: $BUILDPACK"
-    # we'll get errors later if these are needed and don't exist
     chmod -f +x $dir/bin/test || true
 
     if [[ -f $dir/bin/test-compile ]]; then
@@ -54,7 +76,7 @@ for BUILDPACK in $(cat $1/.buildpacks); do
     fi
 
     echo "Running $BUILDPACK test"
-    $dir/bin/test
+    run_buildpack_test=$($dir/bin/test)
     if [ $? != 0 ]; then
       echo "$BUILDPACK test failed"
       exit 1

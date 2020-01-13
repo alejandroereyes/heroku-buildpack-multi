@@ -2,13 +2,13 @@
 
 multi_bin=/tmp/buildpacks/custom/bin
 
-echo 'test-compile - detect buildpacks'
-detect_files=$(source $multi_bin/detect)
-if [ $? != 0 ]; then
-  exit 1
-fi
+echo 'buildpack-multi test-compile - detect buildpacks - doing nothing'
+# detect_files=$(source $multi_bin/detect)
+# if [ $? != 0 ]; then
+  # exit 1
+# fi
 
-echo 'test-compile - compile buildpacks'
-compile_packs=$(source $multi_bin/compile)
+echo 'buildpack-multi test-compile - compile buildpacks - doing nothing'
+# compile_packs=$(source $multi_bin/compile)
 
-exit $?
+# exit $?
