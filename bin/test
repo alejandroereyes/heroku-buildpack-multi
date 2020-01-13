@@ -1,11 +1,65 @@
 #!/usr/bin/env bash
 
-multi_bin=/tmp/buildpacks/custom/bin
+set -e
 
-if [[ -f $1/buildpack-multi-test.sh ]]; then
-  source $1/buildpack-multi-test.sh
-  exit $?
-else
-  echo "buildpack-multi-test.sh not found"
-  exit 1
-fi
+for BUILDPACK in $(cat $1/.buildpacks); do
+  dir=tmp$(mktemp -t buildpackXXXXX)
+
+  rm -rf $dir
+
+  url=${BUILDPACK%#*}
+  branch=${BUILDPACK#*#}
+
+  if [ "$branch" == "$url" ]; then
+    branch=""
+  fi
+  if [ "$url" == "" ]; then
+    echo "Couldn't detect any framework for this buildpack. $BUILDPACK Exiting"
+    exit 1
+  fi
+  echo "=====> Downloading Buildpack: $url"
+  if [[ "$url" =~ \.tgz$ ]] || [[ "$url" =~ \.tgz\? ]]; then
+    mkdir -p "$dir"
+    curl -s "$url" | tar xvz -C "$dir" >/dev/null 2>&1
+  else
+    git clone $url $dir >/dev/null 2>&1
+  fi
+  cd $dir
+
+  if [ "$branch" != "" ]; then
+    git checkout $branch >/dev/null 2>&1
+  fi
+
+  if [[ -f $dir/bin/test ]]; then
+    echo "Detected test for: $BUILDPACK"
+    # we'll get errors later if these are needed and don't exist
+    chmod -f +x $dir/bin/test || true
+
+    if [[ -f $dir/bin/test-compile ]]; then
+      chmod -f +x $dir/bin/test-compile || true
+      echo "=====> Detected test-compile: $test_compile"
+      test_compile=$($dir/bin/test-compile $1)
+    else
+      echo "No test-compile found for: $BUILDPACK"
+    fi
+
+    if [[ -f $1/buildpack-multi-test.sh ]]; then
+      source $1/buildpack-multi-test.sh $BUILDPACK $dir $1
+      if [ $? != 0 ]; then
+        echo "Running buildpack-multi-test failed"
+        exit 1
+      fi
+    else
+      echo "buildpack-multi-test.sh not found"
+    fi
+
+    echo "Running $BUILDPACK test"
+    $dir/bin/test
+    if [ $? != 0 ]; then
+      echo "$BUILDPACK test failed"
+      exit 1
+    fi
+  else
+    echo "No test file found for: $BUILDPACK"
+  fi
+done
