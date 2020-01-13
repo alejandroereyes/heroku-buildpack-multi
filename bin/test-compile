@@ -2,16 +2,14 @@
 
 BP_MULTI_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 
-echo "check bpmulti test args: $0 - $1 - $2 - $3"
-
 echo 'buildpack-multi test-compile - detect buildpacks'
-detect_files=$(source $BP_MULTI_DIR/bin/detect)
+detect_files=$(. $BP_MULTI_DIR/bin/detect $1)
 if [ $? != 0 ]; then
   exit 1
 fi
 
 echo 'buildpack-multi test-compile - compile buildpacks'
-compile_packs=$(source $BP_MULTI_DIR/bin/compile)
+compile_packs=$(. $BP_MULTI_DIR/bin/compile $1 $2 $3)
 if [ $? != 0 ]; then
   exit 1
 fi
