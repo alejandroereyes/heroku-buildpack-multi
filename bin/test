@@ -1,21 +1,17 @@
 #!/usr/bin/env bash
 
 echo 'Running buildpack-multi test'
-echo "BPT - $0"
-echo "BPT - $1"
-echo "BPT - $2"
-echo "BPT - $3"
 
-if [[ -f $1/buildpack-multi-test.sh ]]; then
+if [[ -f $BUILD_PATH/buildpack-multi-test.sh ]]; then
   BP_MULTI_DIR="1"
 else
   BP_MULTI_TEST="0"
 fi
 
-for BUILDPACK in $(cat $1/.buildpacks); do
+for BUILDPACK in $(cat $BUILD_PATH/.buildpacks); do
   if [ "$BP_MULTI_TEST" = "1" ]; then
-    echo "Running found $1/buildpack-multi-test file"
-    . $1/buildpack-multi-test.sh $1 "i" $BUILDPACK
+    echo "Running found $BUILD_PATH/buildpack-multi-test file"
+    . $BUILD_PATH/buildpack-multi-test.sh $BUILD_PATH "i" $BUILDPACK
     if [ $? != 0 ]; then
       echo "Running buildpack-multi-test failed"
       exit 1
@@ -26,5 +22,5 @@ for BUILDPACK in $(cat $1/.buildpacks); do
 done
 
 if [ "$BP_MULTI_TEST" = "1" ]; then
-  . $1/buildpack-multi-test.sh $1 "f"
+  . $BUILD_PATH/buildpack-multi-test.sh $BUILD_PATH "f"
 fi
