@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
-multi_bin=/tmp/buildpacks/custom/bin
+BP_MULTI_DIR=$(cd $(dirname ${0:-}); cd ..; pwd)
 
-echo 'buildpack-multi test-compile - detect buildpacks - doing nothing'
-# detect_files=$(source $multi_bin/detect)
-# if [ $? != 0 ]; then
-  # exit 1
-# fi
+echo 'buildpack-multi test-compile - detect buildpacks'
+detect_files=$(source $BP_MULTI_DIR/bin/detect)
+if [ $? != 0 ]; then
+  exit 1
+fi
 
-echo 'buildpack-multi test-compile - compile buildpacks - doing nothing'
-# compile_packs=$(source $multi_bin/compile)
-
-# exit $?
+echo 'buildpack-multi test-compile - compile buildpacks'
+compile_packs=$(source $BP_MULTI_DIR/bin/compile)
+if [ $? != 0 ]; then
+  exit 1
+fi

@@ -1,87 +1,15 @@
 #!/usr/bin/env bash
 
-set -e
-
-unset GIT_DIR
+echo 'Running buildpack-multi test'
 
 for BUILDPACK in $(cat $1/.buildpacks); do
-  dir=$(mktemp -t buildpackXXXXX)
-  rm -rf $dir
-
-  url=${BUILDPACK%#*}
-  branch=${BUILDPACK#*#}
-
-  if [ "$branch" == "$url" ]; then
-    branch=""
-  fi
-  if [ "$url" == "" ]; then
-    echo "Couldn't detect any framework for this buildpack. $BUILDPACK Exiting"
-    exit 1
-  fi
-  echo "=====> Downloading Buildpack: $url"
-  if [[ "$url" =~ \.tgz$ ]] || [[ "$url" =~ \.tgz\? ]]; then
-    mkdir -p "$dir"
-    curl -s "$url" | tar xvz -C "$dir" >/dev/null 2>&1
-  else
-    git clone $url $dir >/dev/null 2>&1
-  fi
-  cd $dir
-
-  if [ "$branch" != "" ]; then
-    git checkout $branch >/dev/null 2>&1
-  fi
-
-  chmod -f +x $dir/bin/{detect,compile} || true
-
-  framework=$($dir/bin/detect $1)
-
-  if [ $? == 0 ]; then
-    echo "=====> Detected Framework: $framework"
-    $dir/bin/compile $1 $2 $3
-
+  if [[ -f $1/buildpack-multi-test.sh ]]; then
+    source $1/buildpack-multi-test.sh $BUILDPACK $1
     if [ $? != 0 ]; then
-      exit 1
-    fi
-
-    # check if the buildpack left behind an environment for subsequent ones
-    if [ -e $dir/export ]; then
-      source $dir/export
-    fi
-  else
-    echo "No framework found for buildpack $BUILDPACK"
-    exit 1
-  fi
-
-  # TEST =============================================================
-  if [[ -f $dir/bin/test ]]; then
-    echo "Detected test for: $BUILDPACK"
-    chmod -f +x $dir/bin/test || true
-
-    if [[ -f $dir/bin/test-compile ]]; then
-      chmod -f +x $dir/bin/test-compile || true
-      echo "=====> Detected test-compile: $test_compile"
-      test_compile=$($dir/bin/test-compile $1)
-    else
-      echo "No test-compile found for: $BUILDPACK"
-    fi
-
-    if [[ -f $1/buildpack-multi-test.sh ]]; then
-      source $1/buildpack-multi-test.sh $BUILDPACK $dir $1
-      if [ $? != 0 ]; then
-        echo "Running buildpack-multi-test failed"
-        exit 1
-      fi
-    else
-      echo "buildpack-multi-test.sh not found"
-    fi
-
-    echo "Running $BUILDPACK test"
-    run_buildpack_test=$($dir/bin/test)
-    if [ $? != 0 ]; then
-      echo "$BUILDPACK test failed"
+      echo "Running buildpack-multi-test failed"
       exit 1
     fi
   else
-    echo "No test file found for: $BUILDPACK"
+    echo "buildpack-multi-test.sh not found"
   fi
 done
